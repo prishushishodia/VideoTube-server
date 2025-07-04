@@ -7,24 +7,28 @@ import {
     getUserPlaylists,
     removeVideoFromPlaylist,
     updatePlaylist,
-} from "../controllers/playlist.controller.js"
-import {verifyJWT} from "../middlewares/auth.middleware.js"
+} from "../controllers/playlist.controller.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
+router.use(verifyJWT);  // Protect all playlist routes
 
-router.route("/").post(createPlaylist)
+// Create a Playlist
+router.post("/", createPlaylist);
 
+// Get Playlists for a User
+router.get("/user/:userId", getUserPlaylists);
+
+// Playlist Operations by ID
 router
     .route("/:playlistId")
     .get(getPlaylistById)
     .patch(updatePlaylist)
     .delete(deletePlaylist);
 
-router.route("/add/:videoId/:playlistId").patch(addVideoToPlaylist);
-router.route("/remove/:videoId/:playlistId").patch(removeVideoFromPlaylist);
+// Add/Remove Video to/from Playlist - better naming
+router.patch("/:playlistId/videos/:videoId", addVideoToPlaylist);
+router.delete("/:playlistId/videos/:videoId", removeVideoFromPlaylist);
 
-router.route("/user/:userId").get(getUserPlaylists);
-
-export default router
+export default router;
