@@ -1,6 +1,17 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  User,
+  AtSign,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Camera,
+  AlertCircle,
+} from "lucide-react";
 import { register, login } from "../services/authService";
-import { useNavigate } from "react-router-dom";
+import AuthShell from "../components/AuthShell";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,21 +22,21 @@ const Register = () => {
     fullName: "",
     password: "",
   });
-
   const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const handleChange = (e) =>
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
-    if (file) setAvatarFile(file);
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -48,14 +59,8 @@ const Register = () => {
       formDataToSend.append("avatar", avatarFile);
 
       await register(formDataToSend);
-
-      // ✅ Auto-login after successful registration
-      await login({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      navigate("/"); // Redirect to home/dashboard
+      await login({ email: formData.email, password: formData.password });
+      navigate("/");
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Registration failed");
@@ -65,80 +70,98 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-900 px-4">
-      <div className="bg-zinc-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
-        <h1 className="text-2xl font-bold text-white mb-4 text-center">
-          Create Account
-        </h1>
+    <AuthShell
+      title="Create your account"
+      subtitle="Join VideoTube — it only takes a minute."
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link to="/login" className="font-semibold text-brand hover:underline">
+            Sign in
+          </Link>
+        </>
+      }
+    >
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {error && (
+          <div className="flex items-center gap-2 rounded-xl border border-brand/30 bg-brand/10 px-4 py-3 text-sm text-brand">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {error}
+          </div>
+        )}
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            className="w-full p-3 bg-zinc-700 rounded text-white placeholder-zinc-400 focus:outline-none"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full Name"
-            className="w-full p-3 bg-zinc-700 rounded text-white placeholder-zinc-400 focus:outline-none"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="w-full p-3 bg-zinc-700 rounded text-white placeholder-zinc-400 focus:outline-none"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+        {/* avatar uploader */}
+        <div className="flex items-center gap-4">
+          <label className="group relative cursor-pointer">
+            <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-line bg-panel-2">
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Avatar preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Camera className="h-6 w-6 text-zinc-500" />
+              )}
+            </span>
+            <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand text-white ring-2 ring-ink">
+              <Camera className="h-3 w-3" />
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="sr-only"
+              required
+            />
+          </label>
+          <div className="text-sm">
+            <p className="font-medium text-zinc-200">Profile picture</p>
+            <p className="text-muted">Click to upload an avatar (required)</p>
+          </div>
+        </div>
 
-          <label className="block text-white mb-1">Upload Avatar</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="w-full mb-2"
-            required
-          />
+        <IconInput icon={User} name="fullName" placeholder="Full name" value={formData.fullName} onChange={handleChange} />
+        <IconInput icon={AtSign} name="username" placeholder="Username" value={formData.username} onChange={handleChange} />
+        <IconInput icon={Mail} name="email" type="email" placeholder="Email address" value={formData.email} onChange={handleChange} />
 
+        <div className="relative">
+          <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-zinc-500" />
           <input
-            type="password"
+            type={showPw ? "text" : "password"}
             name="password"
             placeholder="Password"
-            className="w-full p-3 bg-zinc-700 rounded text-white placeholder-zinc-400 focus:outline-none"
+            className="field pl-11 pr-11"
             value={formData.password}
             onChange={handleChange}
+            autoComplete="new-password"
             required
           />
-
           <button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 transition text-white font-semibold py-3 rounded"
-            disabled={loading}
+            type="button"
+            onClick={() => setShowPw((s) => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition hover:text-zinc-300"
+            aria-label={showPw ? "Hide password" : "Show password"}
           >
-            {loading ? "Creating..." : "Register"}
+            {showPw ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
           </button>
-        </form>
+        </div>
 
-        {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
-
-        <p className="text-sm text-zinc-400 mt-4 text-center">
-          Already have an account?{" "}
-          <a href="/login" className="text-red-500 hover:underline">
-            Log in
-          </a>
-        </p>
-      </div>
-    </div>
+        <button type="submit" disabled={loading} className="btn btn-primary w-full py-3">
+          {loading ? "Creating account…" : "Create account"}
+        </button>
+      </form>
+    </AuthShell>
   );
 };
+
+const IconInput = ({ icon: Icon, ...props }) => (
+  <div className="relative">
+    {Icon && (
+      <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-zinc-500" />
+    )}
+    <input className="field pl-11" required {...props} />
+  </div>
+);
 
 export default Register;

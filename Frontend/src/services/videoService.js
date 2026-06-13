@@ -1,12 +1,12 @@
 import axios from "../api/axios";
 
-const API = "/videos";
+const API = "/api/v1/videos";
 
 // Fetch all videos (paginated)
 
 
 export const getAllVideos = async (search = "") => {
-  const res = await axios.get(`/api/v1/videos?search=${search}`);
+  const res = await axios.get(`/api/v1/videos?query=${encodeURIComponent(search)}`);
   return res.data;
 };
 

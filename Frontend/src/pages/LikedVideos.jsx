@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ThumbsUp } from "lucide-react";
 import { getLikedVideos } from "../services/likeService";
 import VideoCard from "../components/VideoCard";
-import Loader from "../components/Loader";
+import VideoCardSkeleton from "../components/VideoCardSkeleton";
+import PageHeader from "../components/PageHeader";
+import EmptyState from "../components/EmptyState";
 
 const LikedVideos = () => {
   const [likedVideos, setLikedVideos] = useState([]);
@@ -11,34 +15,62 @@ const LikedVideos = () => {
     const fetchLikedVideos = async () => {
       try {
         const res = await getLikedVideos();
-        setLikedVideos(res?.data?.videos || []);
+        setLikedVideos(res?.data?.data || []);
       } catch (err) {
         console.error("Failed to fetch liked videos:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchLikedVideos();
   }, []);
 
   return (
-    <div className="p-6 text-white bg-black min-h-screen space-y-6">
-      <h1 className="text-3xl font-bold">Liked Videos</h1>
+    <div>
+      <PageHeader
+        icon={ThumbsUp}
+        title="Liked Videos"
+        subtitle={
+          loading
+            ? "Loading your likes…"
+            : `${likedVideos.length} video${likedVideos.length === 1 ? "" : "s"} you enjoyed`
+        }
+      />
 
       {loading ? (
-        <Loader />
-      ) : likedVideos.length === 0 ? (
-        <p className="text-gray-400">You haven't liked any videos yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {likedVideos.map((video) => (
-            <VideoCard key={video._id} video={video} />
+        <Grid>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <VideoCardSkeleton key={i} />
           ))}
-        </div>
+        </Grid>
+      ) : likedVideos.length === 0 ? (
+        <EmptyState
+          icon={ThumbsUp}
+          title="No liked videos yet"
+          subtitle="Tap the like button on any video and it'll show up here."
+          action={
+            <Link to="/" className="btn btn-primary">
+              Browse videos
+            </Link>
+          }
+        />
+      ) : (
+        <Grid>
+          {likedVideos.map((video, i) => (
+            <div key={video._id} style={{ "--i": i % 8 }}>
+              <VideoCard video={video} />
+            </div>
+          ))}
+        </Grid>
       )}
     </div>
   );
 };
+
+const Grid = ({ children }) => (
+  <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 stagger">
+    {children}
+  </div>
+);
 
 export default LikedVideos;

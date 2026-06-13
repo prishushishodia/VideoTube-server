@@ -1,6 +1,6 @@
 import axios from "../api/axios";
 
-const API = "/api/v1/playlist";
+const API = "/api/v1/playlists";
 
 // Create new playlist
 export const createPlaylist = (data) =>
@@ -20,11 +20,11 @@ export const deletePlaylist = (playlistId) =>
 
 // Add video to playlist
 export const addVideoToPlaylist = (videoId, playlistId) =>
-  axios.patch(`${API}/add/${videoId}/${playlistId}`);
+  axios.patch(`${API}/${playlistId}/videos/${videoId}`);
 
 // Remove video from playlist
 export const removeVideoFromPlaylist = (videoId, playlistId) =>
-  axios.patch(`${API}/remove/${videoId}/${playlistId}`);
+  axios.delete(`${API}/${playlistId}/videos/${videoId}`);
 
 // Get all playlists by user ID
 export const getUserPlaylists = (userId) =>

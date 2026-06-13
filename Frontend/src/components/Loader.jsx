@@ -1,12 +1,19 @@
-const Loader = () => {
+const Loader = ({ label = "Loading", full = false }) => {
   return (
-    <div className="flex justify-center items-center h-64">
-      <div className="relative w-12 h-12">
-        <div className="absolute w-full h-full border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-red-500 font-semibold">
-          Loading
-        </div>
-      </div>
+    <div
+      className={`flex flex-col items-center justify-center gap-4 ${
+        full ? "min-h-[60vh]" : "h-64"
+      }`}
+    >
+      <span className="relative inline-flex h-11 w-11">
+        <span className="absolute inset-0 rounded-full border-[3px] border-white/10" />
+        <span className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-brand border-r-brand animate-spin" />
+      </span>
+      {label && (
+        <span className="text-sm font-medium text-muted animate-pulse">
+          {label}…
+        </span>
+      )}
     </div>
   );
 };

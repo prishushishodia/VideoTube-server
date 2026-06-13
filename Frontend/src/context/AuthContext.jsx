@@ -14,10 +14,10 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          const res = await getCurrentUser();
-          
-          if (res?.user || res?.data?.user) {
-            setUser(res?.user || res?.data?.user); // Adjust based on API shape
+          const currentUser = await getCurrentUser();
+
+          if (currentUser?._id) {
+            setUser(currentUser);
           } else {
             setUser(null);
             localStorage.removeItem("token");

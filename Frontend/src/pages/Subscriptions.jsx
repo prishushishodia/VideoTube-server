@@ -1,66 +1,100 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Clapperboard, ChevronRight } from "lucide-react";
 import { getSubscriptions } from "../services/subscriptionService";
-import { getChannelVideos } from "../services/dashboardService";
-import VideoCard from "../components/VideoCard";
+import { useAuth } from "../context/AuthContext";
+import Avatar from "../components/Avatar";
+import PageHeader from "../components/PageHeader";
+import EmptyState from "../components/EmptyState";
 
 const Subscriptions = () => {
+  const { user } = useAuth();
   const [channels, setChannels] = useState([]);
-  const [videosByChannel, setVideosByChannel] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSubscriptions = async () => {
       try {
-        const res = await getSubscriptions();
-        const subscribedChannels = res?.subscriptions || []; // Adjusted based on expected response
-        setChannels(subscribedChannels);
-
-        const videosMap = {};
-
-        for (const sub of subscribedChannels) {
-          const vids = await getChannelVideos(sub._id);
-          videosMap[sub._id] = vids?.videos || [];
-        }
-
-        setVideosByChannel(videosMap);
+        const res = await getSubscriptions(user?._id);
+        // backend returns subscription docs with a populated `channel`
+        const subs = res?.data?.data || [];
+        setChannels(subs.map((s) => s.channel).filter(Boolean));
       } catch (err) {
         console.error("Error fetching subscriptions:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchSubscriptions();
-  }, []);
+    if (user?._id) fetchSubscriptions();
+    else setLoading(false);
+  }, [user]);
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white p-6">
-      <h1 className="text-2xl font-bold mb-6">Your Subscriptions</h1>
+    <div>
+      <PageHeader
+        icon={Clapperboard}
+        title="Subscriptions"
+        subtitle={
+          loading
+            ? "Loading channels…"
+            : `Following ${channels.length} channel${channels.length === 1 ? "" : "s"}`
+        }
+      />
 
       {loading ? (
-        <p className="text-gray-400">Loading...</p>
-      ) : channels.length === 0 ? (
-        <p className="text-gray-400">You haven't subscribed to any channels yet.</p>
-      ) : (
-        <div className="space-y-10">
-          {channels.map((channel) => (
-            <div key={channel._id}>
-              <h2 className="text-lg font-semibold mb-3">{channel.fullName}</h2>
-              {videosByChannel[channel._id]?.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {videosByChannel[channel._id].map((video) => (
-                    <VideoCard key={video._id} video={video} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500">No videos yet from this channel.</p>
-              )}
+        <Grid>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="surface flex items-center gap-4 p-4">
+              <div className="skeleton h-14 w-14 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <div className="skeleton h-4 w-28 rounded" />
+                <div className="skeleton h-3 w-20 rounded" />
+              </div>
             </div>
           ))}
-        </div>
+        </Grid>
+      ) : channels.length === 0 ? (
+        <EmptyState
+          icon={Clapperboard}
+          title="No subscriptions yet"
+          subtitle="Subscribe to channels and they'll appear here for quick access."
+          action={
+            <Link to="/" className="btn btn-primary">
+              Discover channels
+            </Link>
+          }
+        />
+      ) : (
+        <Grid>
+          {channels.map((c, i) => (
+            <Link
+              key={c._id}
+              to={`/profile/${c._id}`}
+              style={{ "--i": i % 8 }}
+              className="surface group flex items-center gap-4 p-4 transition hover:border-white/15 hover:bg-panel-2"
+            >
+              <Avatar src={c.avatar} name={c.fullName || c.username} size="w-14 h-14" ring />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-white">
+                  {c.fullName || c.username}
+                </p>
+                {c.username && (
+                  <p className="truncate text-sm text-muted">@{c.username}</p>
+                )}
+              </div>
+              <ChevronRight className="h-5 w-5 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-brand" />
+            </Link>
+          ))}
+        </Grid>
       )}
     </div>
   );
 };
+
+const Grid = ({ children }) => (
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger">
+    {children}
+  </div>
+);
 
 export default Subscriptions;

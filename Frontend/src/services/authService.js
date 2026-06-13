@@ -32,7 +32,7 @@ export const getCurrentUser = async () => {
     withCredentials: true,
   });
 
-  return res.data?.user || res.data;
+  return res.data?.data || res.data?.user || res.data;
 };
 
 // Get Any User by ID (for visiting profiles)
