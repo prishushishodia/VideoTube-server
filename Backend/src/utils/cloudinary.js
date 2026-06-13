@@ -8,6 +8,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET 
 });
 
+// Safely remove the temp file without throwing if it's already gone.
+const safeUnlink = (filePath) => {
+    try {
+        if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath)
+    } catch {
+        /* ignore cleanup failure */
+    }
+}
+
 const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null
@@ -15,13 +24,12 @@ const uploadOnCloudinary = async (localFilePath) => {
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto"
         })
-        // file has been uploaded successfull
-        //console.log("file is uploaded on cloudinary ", response.url);
-        fs.unlinkSync(localFilePath)
+        // file has been uploaded successfully — remove the local temp copy
+        safeUnlink(localFilePath)
         return response;
 
     } catch (error) {
-        fs.unlinkSync(localFilePath) // remove the locally saved temporary file as the upload operation got failed
+        safeUnlink(localFilePath) // remove the locally saved temporary file as the upload operation got failed
         return null;
     }
 }

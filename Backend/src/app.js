@@ -4,8 +4,21 @@ import cookieParser from "cookie-parser"
 
 const app = express()
 
+// Allow the configured origin(s) plus any localhost port in development,
+// so it doesn't matter which port Vite picks (5173, 5174, …).
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+        const isLocalhost = origin && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+        if (!origin || isLocalhost || allowedOrigins.includes(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error(`Not allowed by CORS: ${origin}`))
+    },
     credentials: true
 }))
 
@@ -38,5 +51,10 @@ app.use("/api/v1/playlists", playlistRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
 
 // http://localhost:8000/api/v1/users/register
+
+// 404 + centralized error handler — must come AFTER all routes
+import { errorHandler, notFound } from "./middlewares/error.middleware.js"
+app.use(notFound)
+app.use(errorHandler)
 
 export { app }

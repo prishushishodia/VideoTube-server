@@ -15,22 +15,17 @@ const avatar = (seed) => `https://i.pravatar.cc/300?u=${encodeURIComponent(seed)
 const cover = (seed) => `https://picsum.photos/seed/${seed}-cover/1280/320`;
 const thumb = (seed) => `https://picsum.photos/seed/${seed}/640/360`;
 
-// Public, real, HTML5-playable sample MP4s (Google sample bucket)
-const SAMPLES = [
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",
+// Public, HTML5-playable sample MP4s (all verified live; the old Google
+// gtv-videos-bucket URLs now 403, so do not use them).
+const WORKING = [
+  "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
+  "https://test-videos.co.uk/vids/sintel/mp4/h264/720/Sintel_720_10s_1MB.mp4",
+  "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4",
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+  "https://www.w3schools.com/html/mov_bbb.mp4",
+  "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4",
 ];
+const SAMPLES = Array.from({ length: 13 }, (_, i) => WORKING[i % WORKING.length]);
 
 const USERS = [
   { username: "aarav.sharma",  fullName: "Aarav Sharma",  email: "aarav.sharma@example.com" },

@@ -37,10 +37,13 @@ const registerUser = asyncHandler( async (req, res) => {
 
 
     const {fullName, email, username, password } = req.body
-    //console.log("email: ", email);
 
+    // All fields must be present, non-empty strings (reject objects → prevents
+    // NoSQL operator injection via the lookup query below).
     if (
-        [fullName, email, username, password].some((field) => field?.trim() === "")
+        [fullName, email, username, password].some(
+            (field) => typeof field !== "string" || field.trim() === ""
+        )
     ) {
         throw new ApiError(400, "All fields are required")
     }
@@ -54,7 +57,7 @@ const registerUser = asyncHandler( async (req, res) => {
     }
     //console.log(req.files);
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
     //const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
     let coverImageLocalPath;
@@ -107,17 +110,20 @@ const loginUser = asyncHandler(async (req, res) =>{
     //send cookie
 
     const {email, username, password} = req.body
-    console.log(email);
 
     if (!username && !email) {
         throw new ApiError(400, "username or email is required")
     }
-    
-    // Here is an alternative of above code based on logic discussed in video:
-    // if (!(username || email)) {
-    //     throw new ApiError(400, "username or email is required")
-        
-    // }
+
+    // Reject non-string credentials so attackers can't inject query operators
+    // (e.g. { "email": { "$gt": "" } }) into the lookup below.
+    if (
+        [username, email, password].some(
+            (field) => field !== undefined && typeof field !== "string"
+        )
+    ) {
+        throw new ApiError(400, "Invalid credentials format")
+    }
 
     const user = await User.findOne({
         $or: [{username}, {email}]
