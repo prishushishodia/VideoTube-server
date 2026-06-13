@@ -1,24 +1,37 @@
-# chai aur backend  series 
+# VideoTube — Full-Stack YouTube Clone
 
-This is a video series on backend with javascript
-- [Model link](https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj?origin=share)
+A monorepo containing the backend API and frontend client.
 
-- [Video playlist](https://www.youtube.com/watch?v=EH3vGeqeIAo&list=PLu71SKxNbfoBGh_8p_NS-ZAh6v7HhYqHW)
+```
+Youtube/
+├── Backend/    Express + MongoDB REST API  (port 8000)
+└── Frontend/   React + Vite + Tailwind SPA (port 5173)
+```
 
----
-# Summary of this project
+## Backend (`/Backend`)
+Express, Mongoose (MongoDB), JWT auth, Cloudinary uploads. Routes under `/api/v1`.
 
-This project is a complex backend project that is built with nodejs, expressjs, mongodb, mongoose, jwt, bcrypt, and many more. This project is a complete backend project that has all the features that a backend project should have.
-We are building a complete video hosting website similar to youtube with all the features like login, signup, upload video, like, dislike, comment, reply, subscribe, unsubscribe, and many more.
+```bash
+cd Backend
+fnm use 20        # backend requires Node 20 (see .node-version)
+npm install
+npm run dev       # http://localhost:8000
+```
 
-Project uses all standard practices like JWT, bcrypt, access tokens, refresh Tokens and many more. We have spent a lot of time in building this project and we are sure that you will learn a lot from this project.
+Requires a local `.env` (not committed) with `MONGODB_URI`, `DB_NAME`, JWT secrets, and Cloudinary keys.
 
----
-Top Contributer to complete all TODOs
+Seed demo data (10 users, videos, comments, likes, subs, playlists):
+```bash
+node -r dotenv/config src/seed.js
+```
 
-1. Spiderman (just sample)  [Link to Repo](https://www.youtube.com/@chaiaurcode)
+## Frontend (`/Frontend`)
+React 19, React Router, Axios, TailwindCSS.
 
---- 
-## How to contribute in this open source Project
+```bash
+cd Frontend
+npm install
+npm run dev       # http://localhost:5173
+```
 
-First, please understand that this is not your regular project to merge your PR. This repo requires you to finish all assignments that are in controller folder. We don't accept half work, please finish all controllers and then reach us out on [Discord](https://hitesh.ai/discord) or [Twitter](https://twitter.com/@hiteshdotcom) and after checking your repo, I will add link to your repo in this readme.
+Set `VITE_API_BASE_URL` in `Frontend/.env` to point at the backend.
